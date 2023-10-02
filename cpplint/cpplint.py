@@ -3284,7 +3284,7 @@ def CheckSpacing(filename, clean_lines, linenum, nesting_state, error):
 
   # You shouldn't have spaces before your brackets, except maybe after
   # 'delete []', 'return []() {};', or 'auto [abc, ...] = ...;'.
-  if Search(r'\w\s+\[', line) and not Search(r'(?:auto&?|delete|return)\s+\[', line):
+  if Search(r'\w\s+\[', line) and not Search(r'(?:auto(?:\s+const)?&*|delete|return)\s+\[', line):
     error(filename, linenum, 'whitespace/braces', 5,
           'Extra space before [')
 
