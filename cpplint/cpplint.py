@@ -6210,6 +6210,9 @@ def ParseArguments(args):
 def main():
   filenames = ParseArguments(sys.argv[1:])
 
+  sys.stderr.reconfigure(encoding='utf-8')
+  sys.stdout.reconfigure(encoding='utf-8')
+
   _cpplint_state.ResetErrorCounts()
   for filename in filenames:
     ProcessFile(filename, _cpplint_state.verbose_level)
