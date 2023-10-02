@@ -952,7 +952,7 @@ class _CppLintState(object):
 
   def PrintErrorCounts(self):
     """Print a summary of errors by category, and the total."""
-    for category, count in self.errors_by_category.iteritems():
+    for category, count in self.errors_by_category.items():
       sys.stderr.write('Category \'%s\' errors found: %d\n' %
                        (category, count))
     sys.stdout.write('Total errors found: %d\n' % self.error_count)
@@ -4286,26 +4286,13 @@ def GetLineWidth(line):
     The width of the line in column positions, accounting for Unicode
     combining characters and wide characters.
   """
-  if isinstance(line, unicode):
-    width = 0
-    for uc in unicodedata.normalize('NFC', line):
-      if unicodedata.east_asian_width(uc) in ('W', 'F'):
-        width += 2
-      elif not unicodedata.combining(uc):
-        # Issue 337
-        # https://mail.python.org/pipermail/python-list/2012-August/628809.html
-        if (sys.version_info.major, sys.version_info.minor) <= (3, 2):
-          # https://github.com/python/cpython/blob/2.7/Include/unicodeobject.h#L81
-          is_wide_build = sysconfig.get_config_var("Py_UNICODE_SIZE") >= 4
-          # https://github.com/python/cpython/blob/2.7/Objects/unicodeobject.c#L564
-          is_low_surrogate = 0xDC00 <= ord(uc) <= 0xDFFF
-          if not is_wide_build and is_low_surrogate:
-            width -= 1
-          
-        width += 1
-    return width
-  else:
-    return len(line)
+  width = 0
+  for uc in unicodedata.normalize('NFC', line):
+    if unicodedata.east_asian_width(uc) in ('W', 'F'):
+      width += 2
+    elif not unicodedata.combining(uc):
+      width += 1
+  return width
 
 
 def CheckStyle(filename, clean_lines, linenum, file_extension, nesting_state,
@@ -4622,7 +4609,7 @@ def _GetTextInside(text, start_pattern):
 
   # Give opening punctuations to get the matching close-punctuations.
   matching_punctuation = {'(': ')', '{': '}', '[': ']'}
-  closing_punctuation = set(matching_punctuation.itervalues())
+  closing_punctuation = set(matching_punctuation.values())
 
   # Find the position to start extracting text.
   match = re.search(start_pattern, text, re.M)
@@ -6222,13 +6209,6 @@ def ParseArguments(args):
 
 def main():
   filenames = ParseArguments(sys.argv[1:])
-
-  # Change stderr to write with replacement characters so we don't die
-  # if we try to print something containing non-ASCII characters.
-  sys.stderr = codecs.StreamReaderWriter(sys.stderr,
-                                         codecs.getreader('utf8'),
-                                         codecs.getwriter('utf8'),
-                                         'replace')
 
   _cpplint_state.ResetErrorCounts()
   for filename in filenames:
